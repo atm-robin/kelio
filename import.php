@@ -5,18 +5,38 @@
     require_once(NUSOAP_PATH.'/nusoap.php');
     
     
+    importFromKelio();
+    
     function importFromKelio(){
         
         global $db, $user, $conf, $user;
         
-        $wsurl = "kelio webservice url";
-        $resultClient = new nusoap_client($wsurl);
+        // A l'appel du webservice passer en paramètres enDate >= currentDate et startDate <= currentDate
+        //
+        $wsurl = "http://www.webservicex.net/sunsetriseservice.asmx?WSDL"; //url du webservice
+        $wsname= 'GetSunSetRiseTime';
+        $params=array('Latitude'=>44.9,'Longitude'=> 4.9);
+        $client = new SoapClient($wsurl);
+
+        
+        $TResult=fetchFromKelio($client, $wurl, $wsname, $params);
+        var_dump($TResult);
+        exit;
         
         
-        $TResult=fetchFromKelio($resultClient);
-        foreach ($employee as $user =>$value) {
-            foreach ($job as $task => $value) {
-                updateTaskFromKelio($task->jobKey, $task->jobCode, $task->durationInHours, $task->periodStartTime, $task->periodEndTime, $task->jobDescription, $task->percentage);
+        $dureeEffective=$task->periodEndTime - $task->peridoStartTime;
+        
+        
+        foreach ($employee as $user) {
+            foreach ($job as $task) {        
+                
+                if ($task->percentage==null){
+                    $pourcentageTache = $task->durationInHours*(($task->periodEndTime-$task->periodStartTime)/100);
+                    updateTaskFromKelio($task->jobKey, $task->jobCode, $task->durationInHours, $task->periodStartTime, $task->periodEndTime, $task->jobDescription, $pourcentage);
+
+                }else{
+                    updateTaskFromKelio($task->jobKey, $task->jobCode, $task->durationInHours, $task->periodStartTime, $task->periodEndTime, $task->jobDescription, $task->percentage, $dureeEffective);
+                }
             }
             
         }
@@ -25,14 +45,17 @@
     
     
     
-    function fetchFromKelio($result){
+    function fetchFromKelio($client, $wsurl, $wsname, $params){
         
         global $db, $user, $conf, $user;
         
-        $parser= new nusoap_parser($result);
         
+        $result=$client->__soapcall($wsname, $params); //nom du webservice appelé et paramètres
+
+//        simplexml_load_string($xml);
         
-        return $parser;
+
+        return $result;
     }
     
     
